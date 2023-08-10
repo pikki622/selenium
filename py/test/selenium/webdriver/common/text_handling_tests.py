@@ -56,8 +56,8 @@ def test_should_represent_ablock_level_element_as_anewline(driver, pages):
     pages.load("simpleTest.html")
     text = driver.find_element(by=By.ID, value="multiline").text
 
-    assert text.startswith("A div containing" + newLine)
-    assert "More than one line of text" + newLine in text
+    assert text.startswith(f"A div containing{newLine}")
+    assert f"More than one line of text{newLine}" in text
     assert text.endswith("and block level elements")
 
 
@@ -116,7 +116,7 @@ def test_should_be_able_to_set_more_than_one_line_of_text_in_atext_area(driver, 
     textarea = driver.find_element(by=By.ID, value="withText")
     textarea.clear()
 
-    expectedText = "I like cheese" + newLine + newLine + "It's really nice"
+    expectedText = f"I like cheese{newLine}{newLine}It's really nice"
 
     textarea.send_keys(expectedText)
 
@@ -162,7 +162,7 @@ def test_should_handle_sibling_block_level_elements(driver, pages):
     pages.load("simpleTest.html")
 
     text = driver.find_element(by=By.ID, value="twoblocks").text
-    assert text == "Some text" + newLine + "Some more text"
+    assert text == f"Some text{newLine}Some more text"
 
 
 @pytest.mark.xfail_safari

@@ -52,7 +52,7 @@ class WebDriverWait:
                      until_not(lambda x: x.find_element(By.ID, "someId").is_displayed())
         """
         self._driver = driver
-        self._timeout = float(timeout)
+        self._timeout = timeout
         self._poll = poll_frequency
         # avoid the divide by zero
         if self._poll == 0:
@@ -83,8 +83,7 @@ class WebDriverWait:
         end_time = time.monotonic() + self._timeout
         while True:
             try:
-                value = method(self._driver)
-                if value:
+                if value := method(self._driver):
                     return value
             except self._ignored_exceptions as exc:
                 screen = getattr(exc, "screen", None)

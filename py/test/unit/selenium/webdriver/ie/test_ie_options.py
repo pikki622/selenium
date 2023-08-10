@@ -57,7 +57,7 @@ def test_element_scroll_behavior(opts):
 
 def test_ensure_clean_session(opts):
     opts.ensure_clean_session = True
-    assert opts.ensure_clean_session is True
+    assert opts.ensure_clean_session
     assert opts.options.get(Options.ENSURE_CLEAN_SESSION) is True
 
 
@@ -74,31 +74,31 @@ def test_raises_exception_for_file_upload_dialog_timeout(opts):
 
 def test_force_create_process_api(opts):
     opts.force_create_process_api = True
-    assert opts.force_create_process_api is True
+    assert opts.force_create_process_api
     assert opts.options.get(Options.FORCE_CREATE_PROCESS_API) is True
 
 
 def test_force_shell_windows_api(opts):
     opts.force_shell_windows_api = True
-    assert opts.force_shell_windows_api is True
+    assert opts.force_shell_windows_api
     assert opts.options.get(Options.FORCE_SHELL_WINDOWS_API) is True
 
 
 def test_full_page_screenshot(opts):
     opts.full_page_screenshot = True
-    assert opts.full_page_screenshot is True
+    assert opts.full_page_screenshot
     assert opts.options.get(Options.FULL_PAGE_SCREENSHOT) is True
 
 
 def test_ignore_protected_mode_settings(opts):
     opts.ignore_protected_mode_settings = True
-    assert opts.ignore_protected_mode_settings is True
+    assert opts.ignore_protected_mode_settings
     assert opts.options.get(Options.IGNORE_PROTECTED_MODE_SETTINGS) is True
 
 
 def test_ignore_zoom_level(opts):
     opts.ignore_zoom_level = True
-    assert opts.ignore_zoom_level is True
+    assert opts.ignore_zoom_level
     assert opts.options.get(Options.IGNORE_ZOOM_LEVEL) is True
 
 
@@ -111,37 +111,37 @@ def test_initial_browser_url(opts):
 
 def test_native_events(opts):
     opts.native_events = True
-    assert opts.native_events is True
+    assert opts.native_events
     assert opts.options.get(Options.NATIVE_EVENTS) is True
 
 
 def test_persistent_hover(opts):
     opts.persistent_hover = True
-    assert opts.persistent_hover is True
+    assert opts.persistent_hover
     assert opts.options.get(Options.PERSISTENT_HOVER) is True
 
 
 def test_require_window_focus(opts):
     opts.require_window_focus = True
-    assert opts.require_window_focus is True
+    assert opts.require_window_focus
     assert opts.options.get(Options.REQUIRE_WINDOW_FOCUS) is True
 
 
 def test_use_per_process_proxy(opts):
     opts.use_per_process_proxy = True
-    assert opts.use_per_process_proxy is True
+    assert opts.use_per_process_proxy
     assert opts.options.get(Options.USE_PER_PROCESS_PROXY) is True
 
 
 def test_use_legacy_file_upload_dialog_handling(opts):
     opts.use_legacy_file_upload_dialog_handling = True
-    assert opts.use_legacy_file_upload_dialog_handling is True
+    assert opts.use_legacy_file_upload_dialog_handling
     assert opts.options.get(Options.USE_LEGACY_FILE_UPLOAD_DIALOG_HANDLING) is True
 
 
 def test_attach_to_edge_chrome(opts):
     opts.attach_to_edge_chrome = True
-    assert opts.attach_to_edge_chrome is True
+    assert opts.attach_to_edge_chrome
     assert opts.options.get(Options.ATTACH_TO_EDGE_CHROME) is True
 
 

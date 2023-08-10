@@ -32,7 +32,7 @@ class Options(ChromiumOptions):
 
     @use_webview.setter
     def use_webview(self, value: bool) -> None:
-        self._use_webview = bool(value)
+        self._use_webview = value
 
     def to_capabilities(self) -> dict:
         """

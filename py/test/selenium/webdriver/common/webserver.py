@@ -197,11 +197,9 @@ def main(argv=None):
     server = SimpleWebServer(port=opts.port)
     server.start()
     print(f"Server started on port {opts.port}, hit CTRL-C to quit")
-    try:
+    with contextlib.suppress(KeyboardInterrupt):
         while 1:
             sleep(0.1)
-    except KeyboardInterrupt:
-        pass
 
 
 if __name__ == "__main__":

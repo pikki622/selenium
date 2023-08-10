@@ -106,10 +106,7 @@ class WebDriver(RemoteWebDriver):
             return None
 
         value = permissions[permission]
-        if not isinstance(value, bool):
-            return None
-
-        return value
+        return None if not isinstance(value, bool) else value
 
     # First available in Safari 11.1 and Safari Technology Preview 42.
     def debug(self):

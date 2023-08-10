@@ -20,13 +20,10 @@ from selenium.webdriver.firefox.service import Service
 
 def test_command_line_args():
     service = Service(service_args=["--log", "trace"])
-    found = False
-
     args = service.command_line_args()
 
-    for idx in range(len(args) - 1):
-        if args[idx] == "--log" and args[idx + 1] == "trace":
-            found = True
-            break
-
+    found = any(
+        args[idx] == "--log" and args[idx + 1] == "trace"
+        for idx in range(len(args) - 1)
+    )
     assert found, "Provided arguments do not exist in array"

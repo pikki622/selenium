@@ -32,7 +32,7 @@ def test_should_be_able_to_execute_simple_javascript_and_return_astring(driver, 
 
     result = driver.execute_script("return document.title")
 
-    assert isinstance(result, str), "The type of the result is %s" % type(result)
+    assert isinstance(result, str), f"The type of the result is {type(result)}"
     assert "XHTML Test Page" == result
 
 
@@ -62,7 +62,7 @@ def test_should_be_able_to_execute_simple_javascript_and_return_alist_of_web_ele
     assert result is not None
     assert isinstance(result, list)
     assert all(isinstance(item, WebElement) for item in result)
-    assert all("a" == item.tag_name.lower() for item in result)
+    assert all(item.tag_name.lower() == "a" for item in result)
 
 
 def test_should_be_able_to_execute_simple_javascript_and_return_web_elements_inside_alist(driver, pages):
@@ -130,10 +130,7 @@ def test_should_be_able_to_execute_simple_javascript_and_return_aboolean(driver,
 
 def test_should_be_able_to_execute_simple_javascript_and_astrings_array(driver, pages):
     pages.load("javascriptPage.html")
-    expectedResult = []
-    expectedResult.append("zero")
-    expectedResult.append("one")
-    expectedResult.append("two")
+    expectedResult = ["zero", "one", "two"]
     result = driver.execute_script("return ['zero', 'one', 'two']")
 
     assert expectedResult == result
@@ -141,12 +138,8 @@ def test_should_be_able_to_execute_simple_javascript_and_astrings_array(driver, 
 
 def test_should_be_able_to_execute_simple_javascript_and_return_an_array(driver, pages):
     pages.load("javascriptPage.html")
-    expectedResult = []
-    expectedResult.append("zero")
-    subList = []
-    subList.append(True)
-    subList.append(False)
-    expectedResult.append(subList)
+    subList = [True, False]
+    expectedResult = ["zero", subList]
     result = driver.execute_script("return ['zero', [true, false]]")
     assert result is not None
     assert isinstance(result, list)
@@ -218,18 +211,11 @@ def test_should_be_able_to_pass_an_array_as_argument(driver, pages):
 
 def test_should_be_able_to_pass_acollection_as_argument(driver, pages):
     pages.load("javascriptPage.html")
-    collection = []
-    collection.append("Cheddar")
-    collection.append("Brie")
-    collection.append(7)
+    collection = ["Cheddar", "Brie", 7]
     length = int(driver.execute_script("return arguments[0].length", collection))
     assert len(collection) == length
 
-    collection = []
-    collection.append("Gouda")
-    collection.append("Stilton")
-    collection.append("Stilton")
-    collection.append(True)
+    collection = ["Gouda", "Stilton", "Stilton", True]
     length = int(driver.execute_script("return arguments[0].length", collection))
     assert len(collection) == length
 

@@ -48,7 +48,7 @@ def pytest_addoption(parser):
         choices=drivers,
         dest="drivers",
         metavar="DRIVER",
-        help="driver to run tests against ({})".format(", ".join(drivers)),
+        help=f'driver to run tests against ({", ".join(drivers)})',
     )
     parser.addoption("--browser-binary", action="store", dest="binary", help="location of the browser binary")
     parser.addoption(
@@ -162,7 +162,7 @@ def get_options(driver_class, config):
         if not options:
             options = getattr(webdriver, f"{driver_class}Options")()
 
-        if driver_class == "Chrome" or driver_class == "Edge":
+        if driver_class in ["Chrome", "Edge"]:
             options.add_argument("--headless=new")
         if driver_class == "Firefox":
             options.add_argument("-headless")

@@ -194,13 +194,9 @@ class ErrorHandler:
         if message == "" and "message" in value:
             message = value["message"]
 
-        screen = None  # type: ignore[assignment]
-        if "screen" in value:
-            screen = value["screen"]
-
+        screen = value["screen"] if "screen" in value else None
         stacktrace = None
-        st_value = value.get("stackTrace") or value.get("stacktrace")
-        if st_value:
+        if st_value := value.get("stackTrace") or value.get("stacktrace"):
             if isinstance(st_value, str):
                 stacktrace = st_value.split("\n")
             else:
@@ -215,7 +211,7 @@ class ErrorHandler:
                         if "className" in frame:
                             meth = f"{frame['className']}.{meth}"
                         msg = "    at %s (%s)"
-                        msg = msg % (meth, file)
+                        msg %= (meth, file)
                         stacktrace.append(msg)
                 except TypeError:
                     pass

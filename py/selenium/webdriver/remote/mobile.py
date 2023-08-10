@@ -32,7 +32,7 @@ class _ConnectionType:
 
     @property
     def data(self):
-        return (self.mask / 4) > 0
+        return self.mask > 0
 
 
 class Mobile:

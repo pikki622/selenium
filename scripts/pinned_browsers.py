@@ -25,27 +25,33 @@ def chromedriver():
 
     content = ""
 
-    linux = 'https://chromedriver.storage.googleapis.com/%s/chromedriver_linux64.zip' % v
+    linux = f'https://chromedriver.storage.googleapis.com/{v}/chromedriver_linux64.zip'
     sha = calculate_hash(linux)
-    content = content + """
+    content += """
     http_archive(
         name = "linux_chromedriver",
         url = "%s",
         sha256 = "%s",
         build_file_content = "exports_files([\\"chromedriver\\"])",
     )
-    """ % (linux, sha)
+    """ % (
+        linux,
+        sha,
+    )
 
-    mac = 'https://chromedriver.storage.googleapis.com/%s/chromedriver_mac64.zip' % v
+    mac = f'https://chromedriver.storage.googleapis.com/{v}/chromedriver_mac64.zip'
     sha = calculate_hash(mac)
-    content = content + """
+    content += """
     http_archive(
         name = "mac_chromedriver",
         url = "%s",
         sha256 = "%s",
         build_file_content = "exports_files([\\"chromedriver\\"])",
     )
-    """ % (mac, sha)
+    """ % (
+        mac,
+        sha,
+    )
     return content
 
 def chrome():
@@ -115,12 +121,12 @@ def edge():
     version = None
 
     for data in all_data:
-        if not "Stable" == data.get("Product"):
+        if data.get("Product") != "Stable":
             continue
         for release in data["Releases"]:
-            if "MacOS" == release.get("Platform"):
+            if release.get("Platform") == "MacOS":
                 for artifact in release["Artifacts"]:
-                    if "pkg" == artifact["ArtifactName"]:
+                    if artifact["ArtifactName"] == "pkg":
                         edge = artifact["Location"]
                         hash = artifact["Hash"]
                         version = release["ProductVersion"]
@@ -146,27 +152,33 @@ def edgedriver():
 
     content = ""
 
-    linux = "https://msedgedriver.azureedge.net/%s/edgedriver_linux64.zip" % v
+    linux = f"https://msedgedriver.azureedge.net/{v}/edgedriver_linux64.zip"
     sha = calculate_hash(linux)
-    content = content + """
+    content += """
     http_archive(
         name = "linux_edgedriver",
         url = "%s",
         sha256 = "%s",
         build_file_content = "exports_files([\\"msedgedriver\\"])",
     )
-    """ % (linux, sha)
+    """ % (
+        linux,
+        sha,
+    )
 
-    mac = "https://msedgedriver.azureedge.net/%s/edgedriver_mac64.zip" % v
+    mac = f"https://msedgedriver.azureedge.net/{v}/edgedriver_mac64.zip"
     sha = calculate_hash(mac)
-    content = content + """
+    content += """
     http_archive(
         name = "mac_edgedriver",
         url = "%s",
         sha256 = "%s",
         build_file_content = "exports_files([\\"msedgedriver\\"])",
     )
-    """ % (mac, sha)
+    """ % (
+        mac,
+        sha,
+    )
     return content
 
 def geckodriver():
@@ -207,9 +219,9 @@ def firefox():
 
     content = ""
 
-    linux = "https://ftp.mozilla.org/pub/firefox/releases/%s/linux-x86_64/en-US/firefox-%s.tar.bz2" % (v, v)
+    linux = f"https://ftp.mozilla.org/pub/firefox/releases/{v}/linux-x86_64/en-US/firefox-{v}.tar.bz2"
     sha = calculate_hash(linux)
-    content = content + """
+    content += """
     http_archive(
         name = "linux_firefox",
         url = "%s",
@@ -227,11 +239,14 @@ exports_files(
 \"\"\",
     )
 
-""" % (linux, sha)
+""" % (
+        linux,
+        sha,
+    )
 
     mac = "https://ftp.mozilla.org/pub/firefox/releases/%s/mac/en-US/Firefox%%20%s.dmg" % (v, v)
     sha = calculate_hash(mac)
-    content = content + """
+    content += """
     dmg_archive(
         name = "mac_firefox",
         url = "%s",
@@ -239,7 +254,10 @@ exports_files(
         build_file_content = "exports_files([\\"Firefox.app\\"])",
     )
 
-""" % (mac, sha)
+""" % (
+        mac,
+        sha,
+    )
 
     return content
 
@@ -255,7 +273,7 @@ load("//common/private:pkg_archive.bzl", "pkg_archive")
 def pin_browsers():
     local_drivers()
 """
-    content = content + firefox()
+    content += firefox()
     content = content + geckodriver()
     content = content + edge()
     content = content + edgedriver()

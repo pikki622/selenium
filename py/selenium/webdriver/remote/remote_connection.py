@@ -198,10 +198,10 @@ class RemoteConnection:
 
         if parsed_url.username:
             base64string = b64encode(f"{parsed_url.username}:{parsed_url.password}".encode())
-            headers.update({"Authorization": f"Basic {base64string.decode()}"})
+            headers["Authorization"] = f"Basic {base64string.decode()}"
 
         if keep_alive:
-            headers.update({"Connection": "keep-alive"})
+            headers["Connection"] = "keep-alive"
 
         return headers
 
@@ -246,9 +246,7 @@ class RemoteConnection:
         self.keep_alive = keep_alive
         self._url = remote_server_addr
 
-        # Env var NO_PROXY will override this part of the code
-        _no_proxy = os.environ.get("no_proxy", os.environ.get("NO_PROXY"))
-        if _no_proxy:
+        if _no_proxy := os.environ.get("no_proxy", os.environ.get("NO_PROXY")):
             for npu in _no_proxy.split(","):
                 npu = npu.strip()
                 if npu == "*":
@@ -256,15 +254,14 @@ class RemoteConnection:
                     break
                 n_url = parse.urlparse(npu)
                 remote_add = parse.urlparse(self._url)
-                if n_url.netloc:
-                    if remote_add.netloc == n_url.netloc:
-                        ignore_proxy = True
-                        break
-                else:
-                    if n_url.path in remote_add.netloc:
-                        ignore_proxy = True
-                        break
-
+                if (
+                    n_url.netloc
+                    and remote_add.netloc == n_url.netloc
+                    or not n_url.netloc
+                    and n_url.path in remote_add.netloc
+                ):
+                    ignore_proxy = True
+                    break
         self._proxy_url = self._get_proxy_url() if not ignore_proxy else None
         if keep_alive:
             self._conn = self._get_connection_manager()
@@ -310,12 +307,11 @@ class RemoteConnection:
 
         if self.keep_alive:
             response = self._conn.request(method, url, body=body, headers=headers)
-            statuscode = response.status
         else:
             conn = self._get_connection_manager()
             with conn as http:
                 response = http.request(method, url, body=body, headers=headers)
-            statuscode = response.status
+        statuscode = response.status
         data = response.data.decode("UTF-8")
         LOGGER.debug(f"Remote response: status={response.status} | data={data} | headers={response.headers}")
         try:
@@ -326,7 +322,7 @@ class RemoteConnection:
             content_type = []
             if response.headers.get("Content-Type", None):
                 content_type = response.headers.get("Content-Type", None).split(";")
-            if not any([x.startswith("image/png") for x in content_type]):
+            if not any(x.startswith("image/png") for x in content_type):
                 try:
                     data = utils.load_json(data.strip())
                 except ValueError:

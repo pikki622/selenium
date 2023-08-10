@@ -36,12 +36,15 @@ def log():
 
 
 def test_should_fire_navigation_events(driver, log, pages):
+
+
+
     class EventListener(AbstractEventListener):
         def before_navigate_to(self, url, driver):
-            log.write(("before_navigate_to %s" % url.split("/")[-1]).encode())
+            log.write(f'before_navigate_to {url.split("/")[-1]}'.encode())
 
         def after_navigate_to(self, url, driver):
-            log.write(("after_navigate_to %s" % url.split("/")[-1]).encode())
+            log.write(f'after_navigate_to {url.split("/")[-1]}'.encode())
 
         def before_navigate_back(self, driver):
             log.write(b"before_navigate_back")
@@ -54,6 +57,7 @@ def test_should_fire_navigation_events(driver, log, pages):
 
         def after_navigate_forward(self, driver):
             log.write(b"after_navigate_forward")
+
 
     ef_driver = EventFiringWebDriver(driver, EventListener())
     ef_driver.get(pages.url("formPage.html"))
@@ -182,9 +186,13 @@ def test_should_unwrap_element_args_when_switching_frames(driver, log, pages):
 
 
 def test_should_be_able_to_access_wrapped_instance_from_event_calls(driver):
+
+
+
     class EventListener(AbstractEventListener):
-        def before_navigate_to(url, d):
+        def before_navigate_to(self, d):
             assert driver is d
+
 
     ef_driver = EventFiringWebDriver(driver, EventListener())
     wrapped_driver = ef_driver.wrapped_driver

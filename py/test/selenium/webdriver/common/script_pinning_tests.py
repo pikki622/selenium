@@ -45,8 +45,7 @@ def test_should_allow_pinned_scripts_to_take_arguments(driver, pages):
 def test_should_list_all_pinned_scripts(driver, pages):
     pages.load("simpleTest.html")
     driver.pinned_scripts = {}
-    expected = []
-    expected.append(driver.pin_script("return arguments[0];").id)
+    expected = [driver.pin_script("return arguments[0];").id]
     expected.append(driver.pin_script("return 'cheese';").id)
     expected.append(driver.pin_script("return 42;").id)
 

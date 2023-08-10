@@ -105,7 +105,7 @@ class Color:
             return cls._from_hsl(*m.groups)
         if str_.upper() in Colors:
             return Colors[str_.upper()]
-        raise ValueError("Could not convert %s into color" % str_)
+        raise ValueError(f"Could not convert {str_} into color")
 
     @classmethod
     def _from_hsl(cls, h: ParseableFloat, s: ParseableFloat, light: ParseableFloat, a: ParseableFloat = 1) -> Color:
@@ -160,15 +160,11 @@ class Color:
         return f"#{self.red:02x}{self.green:02x}{self.blue:02x}"
 
     def __eq__(self, other: object) -> bool:
-        if isinstance(other, Color):
-            return self.rgba == other.rgba
-        return NotImplemented
+        return self.rgba == other.rgba if isinstance(other, Color) else NotImplemented
 
     def __ne__(self, other: Any) -> bool:
         result = self.__eq__(other)
-        if result is NotImplemented:
-            return result
-        return not result
+        return result if result is NotImplemented else not result
 
     def __hash__(self) -> int:
         return hash((self.red, self.green, self.blue, self.alpha))

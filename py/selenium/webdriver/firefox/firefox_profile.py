@@ -176,10 +176,10 @@ class FirefoxProfile:
                 for usr in f:
                     matches = pref_pattern.search(usr)
                     try:
-                        self.default_preferences[matches.group(1)] = json.loads(matches.group(2))
+                        self.default_preferences[matches[1]] = json.loads(matches[2])
                     except Exception:
                         warnings.warn(
-                            f"(skipping) failed to json.loads existing preference: {matches.group(1) + matches.group(2)}"
+                            f"(skipping) failed to json.loads existing preference: {matches[1] + matches[2]}"
                         )
         except Exception:
             # The profile given hasn't had any changes made, i.e no users.js
@@ -198,7 +198,7 @@ class FirefoxProfile:
         tmpdir = None
         xpifile = None
         if addon.endswith(".xpi"):
-            tmpdir = tempfile.mkdtemp(suffix="." + os.path.split(addon)[-1])
+            tmpdir = tempfile.mkdtemp(suffix=f".{os.path.split(addon)[-1]}")
             compressed_file = zipfile.ZipFile(addon, "r")
             for name in compressed_file.namelist():
                 if name.endswith("/"):
@@ -224,10 +224,9 @@ class FirefoxProfile:
             if not os.path.exists(self.extensionsDir):
                 os.makedirs(self.extensionsDir)
                 os.chmod(self.extensionsDir, 0o755)
-            shutil.copy(xpifile, addon_path + ".xpi")
-        else:
-            if not os.path.exists(addon_path):
-                shutil.copytree(addon, addon_path, symlinks=True)
+            shutil.copy(xpifile, f"{addon_path}.xpi")
+        elif not os.path.exists(addon_path):
+            shutil.copytree(addon, addon_path, symlinks=True)
 
         # remove the temporary directory, if any
         if tmpdir:
@@ -318,19 +317,19 @@ class FirefoxProfile:
             em = get_namespace_id(doc, "http://www.mozilla.org/2004/em-rdf#")
             rdf = get_namespace_id(doc, "http://www.w3.org/1999/02/22-rdf-syntax-ns#")
 
-            description = doc.getElementsByTagName(rdf + "Description").item(0)
+            description = doc.getElementsByTagName(f"{rdf}Description").item(0)
             if not description:
                 description = doc.getElementsByTagName("Description").item(0)
             for node in description.childNodes:
                 # Remove the namespace prefix from the tag for comparison
                 entry = node.nodeName.replace(em, "")
                 if entry in details:
-                    details.update({entry: get_text(node)})
+                    details[entry] = get_text(node)
             if not details.get("id"):
                 for i in range(description.attributes.length):
                     attribute = description.attributes.item(i)
-                    if attribute.name == em + "id":
-                        details.update({"id": attribute.value})
+                    if attribute.name == f"{em}id":
+                        details["id"] = attribute.value
         except Exception as e:
             raise AddonFormatError(str(e), sys.exc_info()[2])
 

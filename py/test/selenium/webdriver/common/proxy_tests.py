@@ -137,6 +137,5 @@ def test_can_init_empty_proxy():
     options = ArgOptions()
     options.proxy = proxy
 
-    proxy_capabilities = {}
-    proxy_capabilities["proxyType"] = "unspecified"
+    proxy_capabilities = {"proxyType": "unspecified"}
     assert proxy_capabilities == options.to_capabilities().get("proxy")

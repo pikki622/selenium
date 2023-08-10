@@ -135,4 +135,4 @@ def _click_on_element_which_records_events(driver):
 def _assert_event_fired(driver, eventName):
     result = driver.find_element(By.ID, "result")
     text = result.text
-    assert eventName in text, "No " + eventName + " fired: " + text
+    assert eventName in text, f"No {eventName} fired: {text}"

@@ -242,29 +242,30 @@ class Proxy:
         :Args:
          - raw: raw proxy data. If None, default class values are used.
         """
-        if raw:
-            if "proxyType" in raw and raw["proxyType"]:
-                self.proxy_type = ProxyType.load(raw["proxyType"])
-            if "ftpProxy" in raw and raw["ftpProxy"]:
-                self.ftp_proxy = raw["ftpProxy"]
-            if "httpProxy" in raw and raw["httpProxy"]:
-                self.http_proxy = raw["httpProxy"]
-            if "noProxy" in raw and raw["noProxy"]:
-                self.no_proxy = raw["noProxy"]
-            if "proxyAutoconfigUrl" in raw and raw["proxyAutoconfigUrl"]:
-                self.proxy_autoconfig_url = raw["proxyAutoconfigUrl"]
-            if "sslProxy" in raw and raw["sslProxy"]:
-                self.sslProxy = raw["sslProxy"]
-            if "autodetect" in raw and raw["autodetect"]:
-                self.auto_detect = raw["autodetect"]
-            if "socksProxy" in raw and raw["socksProxy"]:
-                self.socks_proxy = raw["socksProxy"]
-            if "socksUsername" in raw and raw["socksUsername"]:
-                self.socks_username = raw["socksUsername"]
-            if "socksPassword" in raw and raw["socksPassword"]:
-                self.socks_password = raw["socksPassword"]
-            if "socksVersion" in raw and raw["socksVersion"]:
-                self.socks_version = raw["socksVersion"]
+        if not raw:
+            return
+        if "proxyType" in raw and raw["proxyType"]:
+            self.proxy_type = ProxyType.load(raw["proxyType"])
+        if "ftpProxy" in raw and raw["ftpProxy"]:
+            self.ftp_proxy = raw["ftpProxy"]
+        if "httpProxy" in raw and raw["httpProxy"]:
+            self.http_proxy = raw["httpProxy"]
+        if "noProxy" in raw and raw["noProxy"]:
+            self.no_proxy = raw["noProxy"]
+        if "proxyAutoconfigUrl" in raw and raw["proxyAutoconfigUrl"]:
+            self.proxy_autoconfig_url = raw["proxyAutoconfigUrl"]
+        if "sslProxy" in raw and raw["sslProxy"]:
+            self.sslProxy = raw["sslProxy"]
+        if "autodetect" in raw and raw["autodetect"]:
+            self.auto_detect = raw["autodetect"]
+        if "socksProxy" in raw and raw["socksProxy"]:
+            self.socks_proxy = raw["socksProxy"]
+        if "socksUsername" in raw and raw["socksUsername"]:
+            self.socks_username = raw["socksUsername"]
+        if "socksPassword" in raw and raw["socksPassword"]:
+            self.socks_password = raw["socksPassword"]
+        if "socksVersion" in raw and raw["socksVersion"]:
+            self.socks_version = raw["socksVersion"]
 
     @property
     def proxy_type(self):
@@ -302,7 +303,6 @@ class Proxy:
             "socksVersion",
         ]
         for proxy in proxies:
-            attr_value = getattr(self, proxy)
-            if attr_value:
+            if attr_value := getattr(self, proxy):
                 proxy_caps[proxy] = attr_value
         return proxy_caps

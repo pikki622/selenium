@@ -73,11 +73,8 @@ class SeleniumManager:
         args = [str(self.get_binary()), "--browser", browser]
 
         if options.browser_version:
-            args.append("--browser-version")
-            args.append(str(options.browser_version))
-
-        binary_location = getattr(options, "binary_location", None)
-        if binary_location:
+            args.extend(("--browser-version", str(options.browser_version)))
+        if binary_location := getattr(options, "binary_location", None):
             args.append("--browser-path")
             args.append(str(binary_location))
 
@@ -109,9 +106,7 @@ class SeleniumManager:
         """
         if logger.getEffectiveLevel() == logging.DEBUG:
             args.append("--debug")
-        args.append("--output")
-        args.append("json")
-
+        args.extend(("--output", "json"))
         command = " ".join(args)
         logger.debug(f"Executing process: {command}")
         try:
@@ -131,7 +126,7 @@ class SeleniumManager:
         for item in output["logs"]:
             if item["level"] == "WARN":
                 logger.warning(item["message"])
-            if item["level"] == "DEBUG" or item["level"] == "INFO":
+            if item["level"] in ["DEBUG", "INFO"]:
                 logger.debug(item["message"])
 
         if completed_proc.returncode:

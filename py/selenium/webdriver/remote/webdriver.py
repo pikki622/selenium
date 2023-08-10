@@ -84,9 +84,7 @@ def _create_caps(caps):
      - caps - A dictionary of capabilities requested by the caller.
     """
     caps = copy.deepcopy(caps)
-    always_match = {}
-    for k, v in caps.items():
-        always_match[k] = v
+    always_match = dict(caps.items())
     return {"capabilities": {"firstMatch": [{}], "alwaysMatch": always_match}}
 
 
@@ -103,9 +101,7 @@ def get_remote_connection(capabilities, command_executor, keep_alive, ignore_loc
 
 def create_matches(options: List[BaseOptions]) -> Dict:
     capabilities = {"capabilities": {}}
-    opts = []
-    for opt in options:
-        opts.append(opt.to_capabilities())
+    opts = [opt.to_capabilities() for opt in options]
     opts_size = len(opts)
     samesies = {}
 
@@ -113,18 +109,15 @@ def create_matches(options: List[BaseOptions]) -> Dict:
     # https://bugs.python.org/issue38210
     for i in range(opts_size):
         min_index = i
-        if i + 1 < opts_size:
+        if min_index + 1 < opts_size:
             first_keys = opts[min_index].keys()
 
             for kys in first_keys:
-                if kys in opts[i + 1].keys():
-                    if opts[min_index][kys] == opts[i + 1][kys]:
-                        samesies.update({kys: opts[min_index][kys]})
+                if kys in opts[min_index + 1].keys():
+                    if opts[min_index][kys] == opts[min_index + 1][kys]:
+                        samesies[kys] = opts[min_index][kys]
 
-    always = {}
-    for k, v in samesies.items():
-        always[k] = v
-
+    always = dict(samesies)
     for i in opts:
         for k in always:
             del i[k]
@@ -293,16 +286,13 @@ class WebDriver(BaseWebDriver):
 
     def _wrap_value(self, value):
         if isinstance(value, dict):
-            converted = {}
-            for key, val in value.items():
-                converted[key] = self._wrap_value(val)
-            return converted
+            return {key: self._wrap_value(val) for key, val in value.items()}
         if isinstance(value, self._web_element_cls):
             return {"element-6066-11e4-a52e-4f735466cecf": value.id}
         if isinstance(value, self._shadowroot_cls):
             return {"shadow-6066-11e4-a52e-4f735466cecf": value.id}
         if isinstance(value, list):
-            return list(self._wrap_value(item) for item in value)
+            return [self._wrap_value(item) for item in value]
         return value
 
     def create_web_element(self, element_id: str) -> WebElement:
@@ -319,7 +309,7 @@ class WebDriver(BaseWebDriver):
                 value[key] = self._unwrap_value(val)
             return value
         if isinstance(value, list):
-            return list(self._unwrap_value(item) for item in value)
+            return [self._unwrap_value(item) for item in value]
         return value
 
     def execute(self, driver_command: str, params: dict = None) -> dict:
@@ -340,8 +330,7 @@ class WebDriver(BaseWebDriver):
             elif "sessionId" not in params:
                 params["sessionId"] = self.session_id
 
-        response = self.command_executor.execute(driver_command, params)
-        if response:
+        if response := self.command_executor.execute(driver_command, params):
             self.error_handler.check_response(response)
             response["value"] = self._unwrap_value(response.get("value", None))
             return response
@@ -510,10 +499,7 @@ class WebDriver(BaseWebDriver):
         The driver makes a best effort to return a PDF based on the
         provided parameters.
         """
-        options = {}
-        if print_options:
-            options = print_options.to_dict()
-
+        options = print_options.to_dict() if print_options else {}
         return self.execute(Command.PRINT_PAGE, options)["value"]
 
     @property
@@ -629,9 +615,7 @@ class WebDriver(BaseWebDriver):
         """
         if "sameSite" in cookie_dict:
             assert cookie_dict["sameSite"] in ["Strict", "Lax", "None"]
-            self.execute(Command.ADD_COOKIE, {"cookie": cookie_dict})
-        else:
-            self.execute(Command.ADD_COOKIE, {"cookie": cookie_dict})
+        self.execute(Command.ADD_COOKIE, {"cookie": cookie_dict})
 
     # Timeouts
     def implicitly_wait(self, time_to_wait: float) -> None:
@@ -648,7 +632,7 @@ class WebDriver(BaseWebDriver):
 
                 driver.implicitly_wait(30)
         """
-        self.execute(Command.SET_TIMEOUTS, {"implicit": int(float(time_to_wait) * 1000)})
+        self.execute(Command.SET_TIMEOUTS, {"implicit": int(time_to_wait * 1000)})
 
     def set_script_timeout(self, time_to_wait: float) -> None:
         """Set the amount of time that the script should wait during an
@@ -662,7 +646,7 @@ class WebDriver(BaseWebDriver):
 
                 driver.set_script_timeout(30)
         """
-        self.execute(Command.SET_TIMEOUTS, {"script": int(float(time_to_wait) * 1000)})
+        self.execute(Command.SET_TIMEOUTS, {"script": int(time_to_wait * 1000)})
 
     def set_page_load_timeout(self, time_to_wait: float) -> None:
         """Set the amount of time to wait for a page load to complete before
@@ -677,9 +661,12 @@ class WebDriver(BaseWebDriver):
                 driver.set_page_load_timeout(30)
         """
         try:
-            self.execute(Command.SET_TIMEOUTS, {"pageLoad": int(float(time_to_wait) * 1000)})
+            self.execute(Command.SET_TIMEOUTS, {"pageLoad": int(time_to_wait * 1000)})
         except WebDriverException:
-            self.execute(Command.SET_TIMEOUTS, {"ms": float(time_to_wait) * 1000, "type": "page load"})
+            self.execute(
+                Command.SET_TIMEOUTS,
+                {"ms": time_to_wait * 1000, "type": "page load"},
+            )
 
     @property
     def timeouts(self) -> Timeouts:
@@ -721,11 +708,11 @@ class WebDriver(BaseWebDriver):
         :rtype: WebElement
         """
         if isinstance(by, RelativeBy):
-            elements = self.find_elements(by=by, value=value)
-            if not elements:
-                raise NoSuchElementException(f"Cannot locate relative element with: {by.root}")
-            return elements[0]
+            if elements := self.find_elements(by=by, value=value):
+                return elements[0]
 
+            else:
+                raise NoSuchElementException(f"Cannot locate relative element with: {by.root}")
         if by == By.ID:
             by = By.CSS_SELECTOR
             value = f'[id="{value}"]'
@@ -1069,13 +1056,9 @@ class WebDriver(BaseWebDriver):
 
         import re
 
-        if _firefox:
-            # Mozilla Automation Team asked to only support 85
-            # until WebDriver Bidi is available.
-            version = 85
-        else:
-            version = re.search(r".*/(\d+)\.", browser_version).group(1)
-
+        version = (
+            85 if _firefox else re.search(r".*/(\d+)\.", browser_version).group(1)
+        )
         return version, websocket_url
 
     # Virtual Authenticator Methods

@@ -91,8 +91,7 @@ class FirefoxBinary:
             self._modify_link_library_path()
         command = [self._start_cmd, "-foreground"]
         if self.command_line:
-            for cli in self.command_line:
-                command.append(cli)
+            command.extend(iter(self.command_line))
         self.process = Popen(command, stdout=self._log_file, stderr=STDOUT, env=self._firefox_env)
 
     def _wait_until_connectable(self, timeout=30):
@@ -148,10 +147,7 @@ class FirefoxBinary:
         else:
             return ""
 
-        if not command:
-            return ""
-
-        return shlex.split(command)[0]
+        return "" if not command else shlex.split(command)[0]
 
     def _get_firefox_start_cmd(self):
         """Return the command to start firefox."""
@@ -213,7 +209,7 @@ class FirefoxBinary:
             import shutil
 
             shutil.copy(os.path.join(os.path.dirname(__file__), path, self.NO_FOCUS_LIBRARY_NAME), library_path)
-            built_path += library_path + ":"
+            built_path += f"{library_path}:"
 
         return built_path
 

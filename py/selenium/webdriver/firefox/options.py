@@ -29,9 +29,7 @@ class Log:
         self.level = None
 
     def to_capabilities(self) -> dict:
-        if self.level:
-            return {"log": {"level": self.level}}
-        return {}
+        return {"log": {"level": self.level}} if self.level else {}
 
 
 class Options(ArgOptions):
@@ -152,7 +150,7 @@ class Options(ArgOptions):
         if self._arguments:
             opts["args"] = self._arguments
         if self.mobile_options:
-            opts.update(self.mobile_options)
+            opts |= self.mobile_options
 
         opts.update(self.log.to_capabilities())
 

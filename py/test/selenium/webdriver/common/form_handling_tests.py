@@ -161,7 +161,7 @@ def test_toggling_an_option_should_toggle_options_in_amulti_select(driver, pages
 
     selected = option.is_selected()
     option.click()
-    assert not selected == option.is_selected()
+    assert selected != option.is_selected()
 
     option.click()
     assert selected == option.is_selected()

@@ -52,7 +52,7 @@ def test_raises_exception_if_scale_is_not_an_integer(print_options):
 
 def test_set_background(print_options):
     print_options.background = True
-    assert print_options.background is True
+    assert print_options.background
 
 
 def test_unset_value_to_be_none(print_options):
@@ -81,7 +81,7 @@ def test_set_height(print_options):
 
 def test_set_shrink_to_fit(print_options):
     print_options.shrink_to_fit = True
-    assert print_options.shrink_to_fit is True
+    assert print_options.shrink_to_fit
 
 
 def test_raises_exception_if_set_shrink_to_fit_non_bool(print_options):

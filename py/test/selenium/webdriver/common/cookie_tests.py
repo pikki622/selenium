@@ -24,13 +24,18 @@ import pytest
 
 @pytest.fixture
 def cookie(webserver):
-    cookie = {"name": "foo", "value": "bar", "domain": webserver.host, "path": "/", "secure": False}
-    return cookie
+    return {
+        "name": "foo",
+        "value": "bar",
+        "domain": webserver.host,
+        "path": "/",
+        "secure": False,
+    }
 
 
 @pytest.fixture
 def same_site_cookie_strict(webserver):
-    same_site_cookie_strict = {
+    return {
         "name": "foo",
         "value": "bar",
         "path": "/",
@@ -38,12 +43,11 @@ def same_site_cookie_strict(webserver):
         "sameSite": "Strict",
         "secure": False,
     }
-    return same_site_cookie_strict
 
 
 @pytest.fixture
 def same_site_cookie_lax(webserver):
-    same_site_cookie_lax = {
+    return {
         "name": "foo",
         "value": "bar",
         "path": "/",
@@ -51,12 +55,11 @@ def same_site_cookie_lax(webserver):
         "sameSite": "Lax",
         "secure": False,
     }
-    return same_site_cookie_lax
 
 
 @pytest.fixture
 def same_site_cookie_none(webserver):
-    same_site_cookie_none = {
+    return {
         "name": "foo",
         "value": "bar",
         "path": "/",
@@ -64,7 +67,6 @@ def same_site_cookie_none(webserver):
         "sameSite": "None",
         "secure": True,
     }
-    return same_site_cookie_none
 
 
 @pytest.fixture(autouse=True)
@@ -145,7 +147,7 @@ def test_get_all_cookies(cookie, driver, pages, webserver):
     cookies = driver.get_cookies()
     count = len(cookies)
 
-    for i in range(2):
+    for _ in range(2):
         cookie["name"] = f"key_{int(random.random() * 10000000)}"
         driver.add_cookie(cookie)
 
@@ -155,7 +157,7 @@ def test_get_all_cookies(cookie, driver, pages, webserver):
 
 def test_should_not_delete_cookies_with_asimilar_name(cookie, driver, webserver):
     cookie2 = cookie.copy()
-    cookie2["name"] = "{}x".format(cookie["name"])
+    cookie2["name"] = f'{cookie["name"]}x'
     driver.add_cookie(cookie)
     driver.add_cookie(cookie2)
     driver.delete_cookie(cookie["name"])

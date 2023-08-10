@@ -176,9 +176,7 @@ class CdpPrimitiveType(Enum):
     @classmethod
     def get_annotation(cls, cdp_type):
         ''' Return a type annotation for the CDP type. '''
-        if cdp_type == 'any':
-            return 'typing.Any'
-        return cls[cdp_type].value
+        return 'typing.Any' if cdp_type == 'any' else cls[cdp_type].value
 
     @classmethod
     def get_constructor(cls, cdp_type, val):
@@ -227,15 +225,13 @@ class CdpProperty:
                 py_ref = ref_to_python(self.items.ref)
                 ann = f"typing.List[{py_ref}]"
             else:
-                ann = 'typing.List[{}]'.format(
-                    CdpPrimitiveType.get_annotation(self.items.type))
+                ann = f'typing.List[{CdpPrimitiveType.get_annotation(self.items.type)}]'
+        elif self.ref:
+            py_ref = ref_to_python(self.ref)
+            ann = py_ref
         else:
-            if self.ref:
-                py_ref = ref_to_python(self.ref)
-                ann = py_ref
-            else:
-                ann = CdpPrimitiveType.get_annotation(
-                    typing.cast(str, self.type))
+            ann = CdpPrimitiveType.get_annotation(
+                typing.cast(str, self.type))
         if self.optional:
             ann = f'typing.Optional[{ann}]'
         return ann
@@ -271,22 +267,24 @@ class CdpProperty:
         self_ref = 'self.' if use_self else ''
         assign = f"{dict_}['{self.name}'] = "
         if self.items:
-            if self.items.ref:
-                assign += f"[i.to_json() for i in {self_ref}{self.py_name}]"
-            else:
-                assign += f"[i for i in {self_ref}{self.py_name}]"
+            assign += (
+                f"[i.to_json() for i in {self_ref}{self.py_name}]"
+                if self.items.ref
+                else f"[i for i in {self_ref}{self.py_name}]"
+            )
+        elif self.ref:
+            assign += f"{self_ref}{self.py_name}.to_json()"
         else:
-            if self.ref:
-                assign += f"{self_ref}{self.py_name}.to_json()"
-            else:
-                assign += f"{self_ref}{self.py_name}"
-        if self.optional:
-            code = dedent(f'''\
+            assign += f"{self_ref}{self.py_name}"
+        return (
+            dedent(
+                f'''\
                 if {self_ref}{self.py_name} is not None:
-                    {assign}''')
-        else:
-            code = assign
-        return code
+                    {assign}'''
+            )
+            if self.optional
+            else assign
+        )
 
     def generate_from_json(self, dict_):
         ''' Generate the code that creates an instance from a JSON dict named
@@ -299,13 +297,12 @@ class CdpProperty:
             else:
                 cons = CdpPrimitiveType.get_constructor(self.items.type, 'i')
                 expr = f"[{cons} for i in {dict_}['{self.name}']]"
+        elif self.ref:
+            py_ref = ref_to_python(self.ref)
+            expr = f"{py_ref}.from_json({dict_}['{self.name}'])"
         else:
-            if self.ref:
-                py_ref = ref_to_python(self.ref)
-                expr = f"{py_ref}.from_json({dict_}['{self.name}'])"
-            else:
-                expr = CdpPrimitiveType.get_constructor(self.type,
-                                                        f"{dict_}['{self.name}']")
+            expr = CdpPrimitiveType.get_constructor(self.type,
+                                                    f"{dict_}['{self.name}']")
         if self.optional:
             expr = f"{expr} if '{self.name}' in {dict_} else None"
         return expr
@@ -357,8 +354,7 @@ class CdpType:
             superclass = py_type
 
         code = f'class {self.id}({superclass}):\n'
-        doc = docstring(self.description)
-        if doc:
+        if doc := docstring(self.description):
             code += indent(doc, 4) + '\n'
 
         def_to_json = dedent(f'''\
@@ -397,8 +393,7 @@ class CdpType:
                 return cls(json)''')
 
         code = f'class {self.id}(enum.Enum):\n'
-        doc = docstring(self.description)
-        if doc:
+        if doc := docstring(self.description):
             code += indent(doc, 4) + '\n'
         for enum_member in self.enum:
             snake_name = snake_case(enum_member).upper()
@@ -419,8 +414,7 @@ class CdpType:
         code = dedent(f'''\
             @dataclass
             class {self.id}:\n''')
-        doc = docstring(self.description)
-        if doc:
+        if doc := docstring(self.description):
             code += indent(doc, 4) + '\n'
 
         # Emit property declarations. These are sorted so that optional
@@ -474,11 +468,8 @@ class CdpType:
                     refs.add(prop.items.ref)
                 elif prop.ref:
                     refs.add(prop.ref)
-        else:
-            # A primitive type can't have a direct ref, but it can have an items
-            # which contains a ref.
-            if self.items and self.items.ref:
-                refs.add(self.items.ref)
+        elif self.items and self.items.ref:
+            refs.add(self.items.ref)
         return refs
 
 
@@ -488,18 +479,17 @@ class CdpParameter(CdpProperty):
     def generate_code(self):
         ''' Generate the code for a parameter in a function call. '''
         if self.items:
-            if self.items.ref:
-                nested_type = ref_to_python(self.items.ref)
-                py_type = f"typing.List[{nested_type}]"
-            else:
-                nested_type = CdpPrimitiveType.get_annotation(self.items.type)
-                py_type = f'typing.List[{nested_type}]'
+            nested_type = (
+                ref_to_python(self.items.ref)
+                if self.items.ref
+                else CdpPrimitiveType.get_annotation(self.items.type)
+            )
+            py_type = f"typing.List[{nested_type}]"
+        elif self.ref:
+            py_type = f"{ref_to_python(self.ref)}"
         else:
-            if self.ref:
-                py_type = f"{ref_to_python(self.ref)}"
-            else:
-                py_type = CdpPrimitiveType.get_annotation(
-                    typing.cast(str, self.type))
+            py_type = CdpPrimitiveType.get_annotation(
+                typing.cast(str, self.type))
         if self.optional:
             py_type = f'typing.Optional[{py_type}]'
         code = f"{self.py_name}: {py_type}"
@@ -552,12 +542,11 @@ class CdpReturn(CdpProperty):
             else:
                 py_type = CdpPrimitiveType.get_annotation(self.items.type)
                 ann = f'typing.List[{py_type}]'
+        elif self.ref:
+            py_ref = ref_to_python(self.ref)
+            ann = f"{py_ref}"
         else:
-            if self.ref:
-                py_ref = ref_to_python(self.ref)
-                ann = f"{py_ref}"
-            else:
-                ann = CdpPrimitiveType.get_annotation(self.type)
+            ann = CdpPrimitiveType.get_annotation(self.type)
         if self.optional:
             ann = f'typing.Optional[{ann}]'
         return ann
@@ -644,10 +633,7 @@ class CdpCommand:
         else:
             code += ret
 
-        # Generate the docstring
-        doc = ''
-        if self.description:
-            doc = self.description
+        doc = self.description if self.description else ''
         if self.experimental:
             doc += '\n\n**EXPERIMENTAL**'
         if self.parameters and doc:
@@ -820,8 +806,7 @@ class CdpDomain:
         ''' Generate the Python module code for a given CDP domain. '''
         exp = ' (experimental)' if self.experimental else ''
         code = MODULE_HEADER.format(self.domain, exp)
-        import_code = self.generate_imports()
-        if import_code:
+        if import_code := self.generate_imports():
             code += import_code
             code += '\n\n'
         code += '\n'
@@ -859,9 +844,7 @@ class CdpDomain:
                 continue
             if domain != self.domain:
                 dependencies.add(snake_case(domain))
-        code = '\n'.join(f'from . import {d}' for d in sorted(dependencies))
-
-        return code
+        return '\n'.join(f'from . import {d}' for d in sorted(dependencies))
 
     def generate_sphinx(self):
         '''
@@ -940,10 +923,7 @@ def parse(json_path, output_path):
     version = schema['version']
     assert (version['major'], version['minor']) == ('1', '3')
     current_version = f'{version["major"]}.{version["minor"]}'
-    domains = []
-    for domain in schema['domains']:
-        domains.append(CdpDomain.from_json(domain))
-    return domains
+    return [CdpDomain.from_json(domain) for domain in schema['domains']]
 
 
 def generate_init(init_path, domains):

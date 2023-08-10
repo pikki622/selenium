@@ -41,13 +41,13 @@ def test_is_a_baseoptions(options):
 
 def test_can_set_automatic_inspection(options):
     options.automatic_inspection = True
-    assert options.automatic_inspection is True
+    assert options.automatic_inspection
     assert options._caps.get(Options.AUTOMATIC_INSPECTION) is True
 
 
 def test_can_set_automatic_profiling(options):
     options.automatic_profiling = True
-    assert options.automatic_profiling is True
+    assert options.automatic_profiling
     assert options._caps.get(Options.AUTOMATIC_PROFILING) is True
 
 

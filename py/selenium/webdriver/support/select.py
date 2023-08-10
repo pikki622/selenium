@@ -218,21 +218,19 @@ class Select:
             option.click()
 
     def _escape_string(self, value: str) -> str:
-        if '"' in value and "'" in value:
+        if '"' not in value:
+            return f'"{value}"'
+        if "'" in value:
             substrings = value.split('"')
             result = ["concat("]
             for substring in substrings:
-                result.append(f'"{substring}"')
-                result.append(", '\"', ")
-            result = result[0:-1]
+                result.extend((f'"{substring}"', ", '\"', "))
+            result = result[:-1]
             if value.endswith('"'):
                 result.append(", '\"'")
             return "".join(result) + ")"
 
-        if '"' in value:
-            return f"'{value}'"
-
-        return f'"{value}"'
+        return f"'{value}'"
 
     def _get_longest_token(self, value: str) -> str:
         items = value.split(" ")

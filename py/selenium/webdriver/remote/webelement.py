@@ -175,10 +175,11 @@ class WebElement(BaseWebElement):
         """
         if getAttribute_js is None:
             _load_js()
-        attribute_value = self.parent.execute_script(
-            f"/* getAttribute */return ({getAttribute_js}).apply(null, arguments);", self, name
+        return self.parent.execute_script(
+            f"/* getAttribute */return ({getAttribute_js}).apply(null, arguments);",
+            self,
+            name,
         )
-        return attribute_value
 
     def is_selected(self) -> bool:
         """Returns whether the element is selected.
@@ -223,9 +224,7 @@ class WebElement(BaseWebElement):
                 )
             )
             if None not in local_files:
-                remote_files = []
-                for file in local_files:
-                    remote_files.append(self._upload(file))
+                remote_files = [self._upload(file) for file in local_files]
                 value = "\n".join(remote_files)
 
         self._execute(
@@ -273,8 +272,7 @@ class WebElement(BaseWebElement):
     def size(self) -> dict:
         """The size of the element."""
         size = self._execute(Command.GET_ELEMENT_RECT)["value"]
-        new_size = {"height": size["height"], "width": size["width"]}
-        return new_size
+        return {"height": size["height"], "width": size["width"]}
 
     def value_of_css_property(self, property_name) -> str:
         """The value of a CSS property."""
@@ -284,8 +282,7 @@ class WebElement(BaseWebElement):
     def location(self) -> dict:
         """The location of the element in the renderable canvas."""
         old_loc = self._execute(Command.GET_ELEMENT_RECT)["value"]
-        new_loc = {"x": round(old_loc["x"]), "y": round(old_loc["y"])}
-        return new_loc
+        return {"x": round(old_loc["x"]), "y": round(old_loc["y"])}
 
     @property
     def rect(self) -> dict:

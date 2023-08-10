@@ -93,7 +93,7 @@ class Service(ABC):
 
     @path.setter
     def path(self, value: str) -> None:
-        self._path = str(value)
+        self._path = value
 
     def start(self) -> None:
         """Starts the Service.
@@ -117,8 +117,7 @@ class Service(ABC):
 
     def assert_process_still_running(self) -> None:
         """Check if the underlying process is still running."""
-        return_code = self.process.poll()
-        if return_code:
+        if return_code := self.process.poll():
             raise WebDriverException(f"Service {self._path} unexpectedly exited. Status code was: {return_code}")
 
     def is_connectable(self) -> bool:
@@ -141,7 +140,7 @@ class Service(ABC):
 
     def stop(self) -> None:
         """Stops the service."""
-        if self.log_output != PIPE and not (self.log_output == DEVNULL):
+        if self.log_output not in [PIPE, DEVNULL]:
             try:
                 # Todo: Be explicit in what we are catching here.
                 if hasattr(self.log_output, "close"):

@@ -23,8 +23,7 @@ from selenium.webdriver.firefox.options import Options as FirefoxOptions
 
 @pytest.fixture
 def options():
-    options = FirefoxOptions()
-    return options
+    return FirefoxOptions()
 
 
 @pytest.fixture

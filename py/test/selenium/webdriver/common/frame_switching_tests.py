@@ -420,20 +420,19 @@ def test_should_not_switch_magically_to_the_top_window(driver, pages):
     driver.switch_to.frame(0)
     WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.ID, "inputText")))
 
-    for i in range(20):
+    for _ in range(20):
         try:
             input = WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.ID, "inputText")))
             submit = WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.ID, "submitButton")))
             input.clear()
             import random
 
-            input.send_keys("rand%s" % int(random.random()))
+            input.send_keys(f"rand{int(random.random())}")
             submit.click()
         finally:
             url = driver.execute_script("return window.location.href")
-        # IE6 and Chrome add "?"-symbol to the end of the URL
     if url.endswith("?"):
-        url = url[: len(url) - 1]
+        url = url[:-1]
 
     assert pages.url("frame_switching_tests/bug4876_iframe.html") == url
 

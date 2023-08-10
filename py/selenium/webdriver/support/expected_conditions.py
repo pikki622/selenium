@@ -273,9 +273,7 @@ def text_to_be_present_in_element_attribute(
     def _predicate(driver):
         try:
             element_text = driver.find_element(*locator).get_attribute(attribute_)
-            if element_text is None:
-                return False
-            return text_ in element_text
+            return False if element_text is None else text_ in element_text
         except StaleElementReferenceException:
             return False
 
@@ -354,9 +352,7 @@ def element_to_be_clickable(mark: Union[WebElement, Tuple[str, str]]) -> Callabl
         if not isinstance(target, WebElement):  # if given locator instead of WebElement
             target = driver.find_element(*target)  # grab element at locator
         target = visibility_of(target)(driver)
-        if target and target.is_enabled():
-            return target
-        return False
+        return target if target and target.is_enabled() else False
 
     return _predicate
 
